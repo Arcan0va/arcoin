@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ārcøin — Paramètres</title>
+  <title>Ārcøin — Settings</title>
   <link rel="stylesheet" href="shared.css" />
   <link rel="stylesheet" href="settings.css" />
   <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
@@ -19,69 +19,69 @@
     <div class="nav-links">
       <a href="wallet.html" class="nav-link">Wallet</a>
       <a href="contact.html" class="nav-link">Contact</a>
-      <a href="settings.html" class="nav-link active">Paramètres</a>
+      <a href="settings.html" class="nav-link active">Settings</a>
     </div>
     <div class="nav-right">
       <div class="status-pill">
         <div class="status-dot" id="statusDot"></div>
         <span class="status-text" id="statusText">—</span>
       </div>
-      <button class="btn btn-ghost btn-sm" id="btnLogout">Déconnexion</button>
+      <button class="btn btn-ghost btn-sm" id="btnLogout">Sign Out</button>
     </div>
   </nav>
 
   <main class="settings-main">
 
-    <h1 class="page-title">Paramètres</h1>
+    <h1 class="page-title">Settings</h1>
 
     <div class="settings-grid">
 
-      <!-- MOT DE PASSE -->
+      <!-- PASSWORD -->
       <div class="glass settings-card">
-        <div class="settings-card-title">Sécurité — Mot de passe</div>
+        <div class="settings-card-title">Security — Password</div>
         <div class="input-group">
-          <label>Ancien mot de passe</label>
+          <label>Current password</label>
           <input type="password" id="oldPassword" placeholder="••••••••" />
         </div>
         <div class="input-group">
-          <label>Nouveau mot de passe</label>
-          <input type="password" id="newPassword" placeholder="8 caractères minimum" />
+          <label>New password</label>
+          <input type="password" id="newPassword" placeholder="minimum 8 characters" />
         </div>
         <div class="input-group">
-          <label>Confirmer</label>
+          <label>Confirm new password</label>
           <input type="password" id="confirmPassword" placeholder="••••••••" />
         </div>
-        <button class="btn btn-primary" id="btnChangePassword">Changer le mot de passe</button>
+        <button class="btn btn-primary" id="btnChangePassword">Change Password</button>
       </div>
 
-      <!-- CLÉS -->
+      <!-- KEYS -->
       <div class="glass settings-card">
-        <div class="settings-card-title">Clés cryptographiques</div>
+        <div class="settings-card-title">Cryptographic Keys</div>
         <div class="key-section">
-          <div class="key-label">Clé publique</div>
+          <div class="key-label">Public Key</div>
           <div class="key-val" id="settingsPubKey">—</div>
-          <button class="btn btn-ghost btn-sm mt" id="btnCopyPub">Copier</button>
+          <button class="btn btn-ghost btn-sm mt" id="btnCopyPub">Copy</button>
         </div>
         <div class="key-section mt">
-          <div class="key-label warn">⚠ Clé privée</div>
+          <div class="key-label warn">⚠ Private Key</div>
           <div class="key-val blurred" id="settingsPrivKey">—</div>
           <div style="display:flex;gap:0.5rem" class="mt">
-            <button class="btn btn-ghost btn-sm" id="btnRevealPriv">Afficher</button>
-            <button class="btn btn-ghost btn-sm" id="btnCopyPriv">Copier</button>
+            <button class="btn btn-ghost btn-sm" id="btnRevealPriv">Show</button>
+            <button class="btn btn-ghost btn-sm" id="btnCopyPriv">Copy</button>
           </div>
         </div>
-        <p class="hint mt">Ne partage jamais ta clé privée. Elle est stockée uniquement en mémoire — elle disparaît si tu te déconnectes.</p>
+        <p class="hint mt">Never share your private key. It is stored in memory only and will be lost when you sign out.</p>
       </div>
 
-      <!-- COMPTE -->
+      <!-- ACCOUNT INFO -->
       <div class="glass settings-card">
-        <div class="settings-card-title">Informations du compte</div>
+        <div class="settings-card-title">Account Information</div>
         <div class="info-row">
-          <span class="info-label">Identifiant</span>
+          <span class="info-label">Username</span>
           <span class="info-val" id="settingsId">—</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Solde</span>
+          <span class="info-label">Balance</span>
           <span class="info-val" id="settingsBalance">— ARC</span>
         </div>
         <div class="info-row">
@@ -89,11 +89,11 @@
           <span class="info-val" id="settingsTrust">—</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Statut</span>
+          <span class="info-label">Status</span>
           <span class="info-val" id="settingsStatus">—</span>
         </div>
         <div class="divider"></div>
-        <button class="btn btn-danger btn-sm" id="btnLogoutSettings">Se déconnecter</button>
+        <button class="btn btn-danger btn-sm" id="btnLogoutSettings">Sign Out</button>
       </div>
 
     </div>
@@ -104,16 +104,14 @@
   <script>
     requireAuth()
 
-    const user   = Session.getUser()
-    const userId = user?.id
+    const user    = Session.getUser()
+    const userId  = user?.id
     const privKey = user?.privKey || null
 
-    // Remplir les infos
     document.getElementById("settingsId").textContent      = userId || "—"
     document.getElementById("settingsPubKey").textContent  = user?.pubKey || "—"
-    document.getElementById("settingsPrivKey").textContent = privKey || "Non disponible"
+    document.getElementById("settingsPrivKey").textContent = privKey || "Not available"
 
-    // Charger balance
     API.getUser(userId).then(data => {
       if (!data || data.error) return
       document.getElementById("settingsBalance").textContent = `${data.balance} ARC`
@@ -121,34 +119,31 @@
       document.getElementById("settingsStatus").textContent  = data.status
     })
 
-    // Copier pub key
     document.getElementById("btnCopyPub").addEventListener("click", () => {
       navigator.clipboard.writeText(user?.pubKey || "")
-      showToast("Clé publique copiée !", "success")
+      showToast("Public key copied!", "success")
     })
 
-    // Reveal / copier priv key
     document.getElementById("btnRevealPriv").addEventListener("click", () => {
       const el = document.getElementById("settingsPrivKey")
       el.classList.toggle("blurred")
       document.getElementById("btnRevealPriv").textContent =
-        el.classList.contains("blurred") ? "Afficher" : "Masquer"
+        el.classList.contains("blurred") ? "Show" : "Hide"
     })
 
     document.getElementById("btnCopyPriv").addEventListener("click", () => {
       navigator.clipboard.writeText(privKey || "")
-      showToast("Clé privée copiée !", "success")
+      showToast("Private key copied!", "success")
     })
 
-    // Changer mot de passe
     document.getElementById("btnChangePassword").addEventListener("click", async () => {
       const oldP = document.getElementById("oldPassword").value
       const newP = document.getElementById("newPassword").value
       const conf = document.getElementById("confirmPassword").value
 
-      if (!oldP || !newP || !conf) { showToast("Remplis tous les champs", "error"); return }
-      if (newP !== conf) { showToast("Les mots de passe ne correspondent pas", "error"); return }
-      if (newP.length < 8) { showToast("Minimum 8 caractères", "error"); return }
+      if (!oldP || !newP || !conf) { showToast("Fill in all fields", "error"); return }
+      if (newP !== conf)           { showToast("Passwords don't match", "error"); return }
+      if (newP.length < 8)         { showToast("Minimum 8 characters", "error"); return }
 
       const btn = document.getElementById("btnChangePassword")
       btn.disabled = true
@@ -157,19 +152,18 @@
       const data = await API.changePassword(oldP, newP)
 
       btn.disabled = false
-      btn.textContent = "Changer le mot de passe"
+      btn.textContent = "Change Password"
 
       if (data?.success) {
-        showToast("Mot de passe changé ✓", "success")
-        document.getElementById("oldPassword").value = ""
-        document.getElementById("newPassword").value = ""
+        showToast("Password changed ✓", "success")
+        document.getElementById("oldPassword").value    = ""
+        document.getElementById("newPassword").value    = ""
         document.getElementById("confirmPassword").value = ""
       } else {
-        showToast(data?.error || "Erreur", "error")
+        showToast(data?.error || "Error", "error")
       }
     })
 
-    // Logout
     const logout = () => { Session.clear(); window.location.href = "login.html" }
     document.getElementById("btnLogout").addEventListener("click", logout)
     document.getElementById("btnLogoutSettings").addEventListener("click", logout)

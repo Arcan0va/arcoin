@@ -1,16 +1,15 @@
 // ===== AUTH CHECK =====
 requireAuth()
 
-const user    = Session.getUser()
-const userId  = user?.id
-let   privKey = user?.privKey || null
-let   priceHistory = []
+const user   = Session.getUser()
+const userId = user?.id
+let privKey  = user?.privKey || null
+let priceHistory = []
 
 // ===== INIT UI =====
 document.getElementById("walletUser").textContent = userId || "—"
 document.getElementById("receiveId").textContent  = userId || "—"
 
-// QR code pour recevoir
 if (userId) {
   new QRCode(document.getElementById("receiveQR"), {
     text: userId, width: 120, height: 120,
@@ -21,12 +20,11 @@ if (userId) {
 // ===== OTP COUNTDOWN =====
 function startOTPCountdown() {
   function tick() {
-    const rem = 30 - (Math.floor(Date.now() / 1000) % 30)
-    const pct = (rem / 30) * 100
+    const rem  = 30 - (Math.floor(Date.now() / 1000) % 30)
+    const pct  = (rem / 30) * 100
     const fill = document.getElementById("otpFill")
     const time = document.getElementById("otpTime")
-    if (fill) fill.style.width = `${pct}%`
-    if (fill) fill.classList.toggle("urgent", rem <= 7)
+    if (fill) { fill.style.width = `${pct}%`; fill.classList.toggle("urgent", rem <= 7) }
     if (time) time.textContent = `${rem}s`
   }
   tick()
@@ -37,9 +35,7 @@ function startOTPCountdown() {
 function setTrust(value) {
   const arc = document.getElementById("trustArc")
   if (!arc) return
-  const circumference = 213.6
-  const offset = circumference - (value / 100) * circumference
-  arc.style.strokeDashoffset = offset
+  arc.style.strokeDashoffset = 213.6 - (value / 100) * 213.6
   document.getElementById("trustValue").textContent = value
 }
 
@@ -76,7 +72,7 @@ function updateChart(price) {
   if (!chart) return
   priceHistory.push(price)
   if (priceHistory.length > 20) priceHistory.shift()
-  chart.data.labels = priceHistory.map((_, i) => i)
+  chart.data.labels   = priceHistory.map((_, i) => i)
   chart.data.datasets[0].data = priceHistory
   chart.update()
 }
@@ -84,8 +80,7 @@ function updateChart(price) {
 // ===== LOAD DATA =====
 async function loadBalance() {
   if (!userId) return
-  const data  = await API.getUser(userId)
-  const price = await API.getPrice()
+  const [data, price] = await Promise.all([API.getUser(userId), API.getPrice()])
   if (!data || data.error) return
 
   document.getElementById("walletBalance").textContent = data.balance
@@ -96,7 +91,7 @@ async function loadBalance() {
     document.getElementById("walletFiat").textContent = `≈ ${valEUR} € / ${valUSD} $`
     document.getElementById("priceEUR").textContent   = `${price.EUR} €`
     document.getElementById("priceUSD").textContent   = `${price.USD} $`
-    document.getElementById("priceMeta").textContent  = `Volume : ${price.volume} ARC · ${price.transactions} txs`
+    document.getElementById("priceMeta").textContent  = `Volume: ${price.volume} ARC · ${price.transactions} txs`
     updateChart(price.EUR)
   }
 
@@ -107,13 +102,13 @@ async function loadHistory() {
   const data = await API.getLedger()
   const list = document.getElementById("historyList")
   if (!data || !data.transactions) {
-    list.innerHTML = '<div class="empty-state">Impossible de charger</div>'
+    list.innerHTML = '<div class="empty-state">Unable to load</div>'
     return
   }
 
   const txs = [...data.transactions].reverse()
   if (txs.length === 0) {
-    list.innerHTML = '<div class="empty-state">Aucune transaction</div>'
+    list.innerHTML = '<div class="empty-state">No transactions yet</div>'
     return
   }
 
@@ -132,58 +127,55 @@ async function loadHistory() {
   `).join("")
 }
 
-// ===== ENVOYER =====
+// ===== SEND =====
 document.getElementById("btnSend").addEventListener("click", async () => {
-  if (!privKey) {
-    showToast("Clé privée manquante — reconnecte-toi", "error")
-    return
-  }
+  if (!privKey) { showToast("Private key missing — please sign in again", "error"); return }
 
   const receiverId = document.getElementById("sendReceiver").value.trim()
   const amount     = parseInt(document.getElementById("sendAmount").value)
   const note       = document.getElementById("sendNote").value.trim()
   const token2FA   = document.getElementById("send2FA").value.trim()
 
-  if (!receiverId)          { showToast("Entre un destinataire", "error"); return }
-  if (!amount || amount <= 0) { showToast("Montant invalide", "error"); return }
-  if (!token2FA)            { showToast("Entre ton code 2FA", "error"); return }
+  if (!receiverId)           { showToast("Enter a recipient", "error"); return }
+  if (!amount || amount <= 0) { showToast("Invalid amount", "error"); return }
+  if (!token2FA)             { showToast("Enter your 2FA code", "error"); return }
 
   const signature = Crypto.sign(userId, receiverId, amount, note, privKey)
 
   const btn = document.getElementById("btnSend")
   btn.disabled = true
-  btn.textContent = "Envoi..."
+  btn.textContent = "Sending..."
 
   const data = await API.send(userId, receiverId, amount, note, signature, token2FA, user.pubKey)
 
   btn.disabled = false
-  btn.textContent = "Envoyer →"
+  btn.textContent = "Send →"
 
   const result = document.getElementById("sendResult")
   result.classList.remove("hidden", "success", "error")
 
   if (data?.success) {
     result.classList.add("success")
-    result.textContent = `✓ ${userId} → ${receiverId} : ${amount} ARC confirmé`
+    result.textContent = `✓ ${userId} → ${receiverId} : ${amount} ARC confirmed`
     document.getElementById("send2FA").value = ""
     await loadBalance()
     await loadHistory()
-    showToast("Transaction envoyée !", "success")
+    showToast("Transaction sent!", "success")
   } else {
     result.classList.add("error")
-    result.textContent = `✗ ${data?.error || "Erreur serveur"}`
-    showToast(data?.error || "Erreur", "error")
+    result.textContent = `✗ ${data?.error || "Server error"}`
+    showToast(data?.error || "Error", "error")
   }
 })
 
-// ===== RECEVOIR =====
+// ===== RECEIVE =====
 document.getElementById("btnCopyId").addEventListener("click", () => {
   navigator.clipboard.writeText(userId || "")
-  showToast("Identifiant copié !", "success")
+  showToast("Username copied!", "success")
 })
 document.getElementById("receiveId").addEventListener("click", () => {
   navigator.clipboard.writeText(userId || "")
-  showToast("Identifiant copié !", "success")
+  showToast("Username copied!", "success")
 })
 
 // ===== REFRESH =====
@@ -202,10 +194,7 @@ async function init() {
   initChart()
   await loadBalance()
   await loadHistory()
-  setInterval(async () => {
-    await loadBalance()
-    checkServerStatus()
-  }, 60000)
+  setInterval(async () => { await loadBalance(); checkServerStatus() }, 60000)
 }
 
 init()

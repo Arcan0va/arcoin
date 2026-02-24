@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,32 +16,29 @@
 
   <div class="bg-orbs"></div>
 
-  <!-- NAVBAR -->
   <nav class="navbar">
     <div class="nav-logo">Ārc<span>ø</span>in</div>
     <div class="nav-links">
       <a href="wallet.html" class="nav-link active">Wallet</a>
       <a href="contact.html" class="nav-link">Contact</a>
-      <a href="settings.html" class="nav-link">Paramètres</a>
+      <a href="settings.html" class="nav-link">Settings</a>
     </div>
     <div class="nav-right">
       <div class="status-pill">
         <div class="status-dot" id="statusDot"></div>
         <span class="status-text" id="statusText">—</span>
       </div>
-      <button class="btn btn-ghost btn-sm" id="btnLogout">Déconnexion</button>
+      <button class="btn btn-ghost btn-sm" id="btnLogout">Sign Out</button>
     </div>
   </nav>
 
-  <!-- MAIN -->
   <main class="wallet-main">
 
-    <!-- ROW 1 : balance + prix + actions rapides -->
+    <!-- ROW 1 -->
     <div class="wallet-top">
 
-      <!-- BALANCE CARD -->
       <div class="glass card-balance">
-        <div class="card-label">Solde total</div>
+        <div class="card-label">Total Balance</div>
         <div class="balance-row">
           <span class="balance-amount" id="walletBalance">—</span>
           <span class="balance-unit">ARC</span>
@@ -50,21 +47,19 @@
         <div class="wallet-user" id="walletUser">—</div>
       </div>
 
-      <!-- PRIX CARD -->
       <div class="glass card-price">
-        <div class="card-label">Prix Ārcøin</div>
+        <div class="card-label">Ārcøin Price</div>
         <div class="price-row">
           <span class="price-eur" id="priceEUR">— €</span>
           <span class="price-sep">/</span>
           <span class="price-usd" id="priceUSD">— $</span>
         </div>
-        <div class="price-meta" id="priceMeta">Volume : — ARC</div>
+        <div class="price-meta" id="priceMeta">Volume: — ARC</div>
         <div class="price-chart-wrap">
           <canvas id="priceChart"></canvas>
         </div>
       </div>
 
-      <!-- TRUST CARD -->
       <div class="glass card-trust">
         <div class="card-label">Trust Score</div>
         <div class="trust-circle-wrap">
@@ -82,34 +77,34 @@
           </svg>
           <span class="trust-value" id="trustValue">—</span>
         </div>
-        <div class="trust-label">Score de réputation</div>
+        <div class="trust-label">Reputation score</div>
       </div>
 
     </div>
 
-    <!-- ROW 2 : envoyer + recevoir + historique -->
+    <!-- ROW 2 -->
     <div class="wallet-bottom">
 
-      <!-- ENVOYER -->
+      <!-- SEND -->
       <div class="glass card-send">
-        <div class="card-title">Envoyer</div>
+        <div class="card-title">Send ARC</div>
         <div class="input-group">
-          <label>Destinataire</label>
+          <label>Recipient username</label>
           <div class="input-wrap">
             <span class="input-icon">◈</span>
-            <input type="text" id="sendReceiver" placeholder="identifiant du destinataire" />
+            <input type="text" id="sendReceiver" placeholder="recipient's username" />
           </div>
         </div>
         <div class="input-group">
-          <label>Montant (ARC)</label>
+          <label>Amount (ARC)</label>
           <input type="number" id="sendAmount" placeholder="100" min="1" />
         </div>
         <div class="input-group">
-          <label>Note (optionnel)</label>
-          <input type="text" id="sendNote" placeholder="ex: farm iron" />
+          <label>Note (optional)</label>
+          <input type="text" id="sendNote" placeholder="e.g. farm iron" />
         </div>
         <div class="input-group">
-          <label>Code 2FA</label>
+          <label>2FA Code — Open Google Authenticator and enter the 6-digit code</label>
           <div class="input-wrap">
             <span class="input-icon">⬡</span>
             <input type="text" id="send2FA" placeholder="000000" maxlength="6" inputmode="numeric" />
@@ -118,28 +113,29 @@
             <div class="otp-bar"><div class="otp-fill" id="otpFill"></div></div>
             <span class="otp-time" id="otpTime">30s</span>
           </div>
+          <div class="otp-hint">⚠ The code changes every 30 seconds — enter it quickly</div>
         </div>
-        <button class="btn btn-primary" id="btnSend">Envoyer →</button>
+        <button class="btn btn-primary" id="btnSend">Send →</button>
         <div id="sendResult" class="send-result hidden"></div>
       </div>
 
-      <!-- RECEVOIR -->
+      <!-- RECEIVE -->
       <div class="glass card-receive">
-        <div class="card-title">Recevoir</div>
-        <p class="receive-hint">Partage ton identifiant pour recevoir des ARC</p>
+        <div class="card-title">Receive ARC</div>
+        <p class="receive-hint">Share your username so others can send you ARC</p>
         <div class="receive-id" id="receiveId">—</div>
         <div class="qr-wrap" id="receiveQR"></div>
-        <button class="btn btn-ghost btn-sm mt" id="btnCopyId">Copier l'identifiant</button>
+        <button class="btn btn-ghost btn-sm mt" id="btnCopyId">Copy username</button>
       </div>
 
-      <!-- HISTORIQUE -->
+      <!-- HISTORY -->
       <div class="glass card-history">
         <div class="card-title-row">
-          <div class="card-title">Historique</div>
+          <div class="card-title">Transaction History</div>
           <button class="btn btn-ghost btn-sm" id="btnRefreshHistory">↻</button>
         </div>
         <div class="history-list" id="historyList">
-          <div class="empty-state">Chargement...</div>
+          <div class="empty-state">Loading...</div>
         </div>
       </div>
 
