@@ -155,7 +155,7 @@ function show2FA(secret, userId) {
   $("block2FA").classList.remove("hidden")
   $("display2FASecret").textContent = secret
   $("qrcode").innerHTML = ""
-  const otpUrl = `otpauth://totp/ArcaCoin%20(${userId})?secret=${secret}&issuer=ArcaCoin`
+  const otpUrl = `otpauth://totp/${userId}?secret=${secret}&issuer=ArcaCoin`
   new QRCode($("qrcode"), {
     text:   otpUrl,
     width:  160,
