@@ -58,8 +58,8 @@ document.getElementById("login2FA").addEventListener("keydown", e => {
 let regKeys      = null
 let reg2FASecret = null
 
-// STEP 1 → STEP 2 : juste les infos, pas encore de register
-document.getElementById("btnStep1").addEventListener("click", () => {
+// STEP 1 → STEP 2
+document.getElementById("btnStep1").addEventListener("click", async () => {
   const id      = document.getElementById("regId").value.trim()
   const pass    = document.getElementById("regPassword").value
   const confirm = document.getElementById("regPasswordConfirm").value
@@ -68,38 +68,38 @@ document.getElementById("btnStep1").addEventListener("click", () => {
   if (pass.length < 8)  { showToast("Password too short (8 min)", "error"); return }
   if (pass !== confirm) { showToast("Passwords don't match", "error"); return }
 
+  const btn = document.getElementById("btnStep1")
+  btn.disabled = true
+  btn.textContent = "Creating..."
+
   // Générer les clés
   regKeys = Crypto.generateKeys()
-  document.getElementById("regPubKey").textContent  = regKeys.pubKey
-  document.getElementById("regPrivKey").textContent = regKeys.privKey
 
-  // Afficher step2 AVANT tout le reste
-  document.getElementById("step1").classList.add("hidden")
-  document.getElementById("step2").classList.remove("hidden")
+  // Register sur le serveur — on attend la réponse
+  const data = await API.register(id, regKeys.pubKey, pass)
 
-  // Enregistrer le compte dès maintenant pour avoir le secret 2FA
-  // et afficher le QR code immédiatement
-  registerAndShowQR(id, pass)
-})
-
-// Fonction séparée : register + afficher QR
-async function registerAndShowQR(id, password) {
-  const data = await API.register(id, regKeys.pubKey, password)
+  btn.disabled = false
+  btn.textContent = "Next →"
 
   if (!data || !data.success) {
     showToast(data?.error || "Server error", "error")
-    // Revenir au step 1
-    document.getElementById("step2").classList.add("hidden")
-    document.getElementById("step1").classList.remove("hidden")
     return
   }
 
   reg2FASecret = data.secret2FA
 
-  // Afficher le secret en texte
+  // Afficher les clés
+  document.getElementById("regPubKey").textContent  = regKeys.pubKey
+  document.getElementById("regPrivKey").textContent = regKeys.privKey
+
+  // Passer au step 2 — div maintenant visible
+  document.getElementById("step1").classList.add("hidden")
+  document.getElementById("step2").classList.remove("hidden")
+
+  // Afficher le secret 2FA en texte
   document.getElementById("reg2FASecret").textContent = reg2FASecret
 
-  // Générer le QR — step2 est déjà visible ici
+  // Générer le QR — step2 est visible, ça marche
   document.getElementById("qrWrap").innerHTML = ""
   const otpUrl = `otpauth://totp/${id}?secret=${reg2FASecret}&issuer=ArcaCoin`
   new QRCode(document.getElementById("qrWrap"), {
@@ -108,7 +108,7 @@ async function registerAndShowQR(id, password) {
   })
 
   showToast("Account created! Scan the QR code now.", "success")
-}
+})
 
 document.getElementById("btnBackStep1").addEventListener("click", () => {
   document.getElementById("step2").classList.add("hidden")
@@ -131,18 +131,17 @@ document.getElementById("btnCopyPriv").addEventListener("click", () => {
 
 // Confirmer 2FA + se connecter
 document.getElementById("btnRegisterConfirm").addEventListener("click", async () => {
-  const id      = document.getElementById("regId").value.trim()
+  const id       = document.getElementById("regId").value.trim()
   const password = document.getElementById("regPassword").value
   const code2FA  = document.getElementById("reg2FACode").value.trim()
 
-  if (!code2FA)        { showToast("Enter the 2FA code to confirm", "error"); return }
-  if (!reg2FASecret)   { showToast("Please wait for QR code to load", "error"); return }
+  if (!code2FA)      { showToast("Enter the 2FA code to confirm", "error"); return }
+  if (!reg2FASecret) { showToast("Please wait for QR code to load", "error"); return }
 
   const btn = document.getElementById("btnRegisterConfirm")
   btn.disabled = true
   btn.textContent = "Connecting..."
 
-  // Login direct avec le code 2FA scanné
   const loginData = await API.login(id, password, code2FA)
 
   btn.disabled = false
