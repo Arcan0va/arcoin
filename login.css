@@ -1,0 +1,177 @@
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.login-logo {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #fff;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.login-logo span { color: var(--accent); }
+
+.login-wrap {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+}
+
+/* TABS */
+.login-tabs {
+  display: flex;
+  gap: 0.3rem;
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px;
+  padding: 0.3rem;
+  margin-bottom: 1.8rem;
+}
+
+.login-tab {
+  flex: 1;
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: var(--text-dim);
+  padding: 0.55rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.login-tab.active {
+  background: rgba(167,139,250,0.15);
+  color: var(--accent);
+}
+
+/* FORM */
+.login-form {}
+
+/* OTP BAR */
+.otp-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.otp-bar {
+  flex: 1;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.otp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width 1s linear, background 0.3s;
+}
+
+.otp-fill.urgent { background: var(--danger); }
+
+.otp-time {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  min-width: 26px;
+}
+
+/* STEP */
+.step-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  margin-bottom: 1.2rem;
+  text-transform: uppercase;
+}
+
+/* KEY CARD */
+.key-card {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.warn-card { border-color: rgba(251,191,36,0.2); }
+
+.key-card-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.warn-card .key-card-label { color: var(--warn); }
+
+.key-value {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--success);
+  word-break: break-all;
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+.key-value.blurred {
+  filter: blur(5px);
+  color: var(--warn);
+  transition: filter 0.3s;
+  user-select: none;
+}
+
+.key-value.blurred.revealed { filter: none; }
+
+/* QR */
+.qr-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 0.5rem;
+}
+
+.qr-wrap canvas, .qr-wrap img {
+  border-radius: 8px;
+  border: 3px solid rgba(255,255,255,0.1);
+}
+
+.secret-box {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--warn);
+  text-align: center;
+  background: rgba(251,191,36,0.05);
+  border: 1px solid rgba(251,191,36,0.15);
+  border-radius: 8px;
+  padding: 0.6rem;
+  word-break: break-all;
+  margin-top: 0.5rem;
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 0.5rem;
+  line-height: 1.5;
+}

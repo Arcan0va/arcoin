@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ārcøin — Contact</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="stylesheet" href="contact.css" />
+  <script src="api.js"></script>
+</head>
+<body>
+
+  <div class="bg-orbs"></div>
+
+  <nav class="navbar">
+    <div class="nav-logo">Ārc<span>ø</span>in</div>
+    <div class="nav-links">
+      <a href="wallet.html" class="nav-link">Wallet</a>
+      <a href="contact.html" class="nav-link active">Contact</a>
+      <a href="settings.html" class="nav-link">Paramètres</a>
+    </div>
+    <div class="nav-right">
+      <div class="status-pill">
+        <div class="status-dot" id="statusDot"></div>
+        <span class="status-text" id="statusText">—</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="contact-main">
+
+    <div class="contact-wrap">
+      <h1 class="page-title">Contact</h1>
+      <p class="page-sub">Une question, un problème ou une suggestion ? Envoie un message.</p>
+
+      <div class="glass contact-card">
+        <div class="input-group">
+          <label>Ton identifiant (optionnel)</label>
+          <input type="text" id="contactId" placeholder="ex: gamer42" />
+        </div>
+        <div class="input-group">
+          <label>Sujet</label>
+          <input type="text" id="contactSubject" placeholder="ex: Problème de transaction" />
+        </div>
+        <div class="input-group">
+          <label>Message</label>
+          <textarea id="contactMessage" rows="5" placeholder="Décris ton problème..."></textarea>
+        </div>
+        <button class="btn btn-primary" id="btnSendContact">Envoyer le message</button>
+        <div id="contactResult" class="contact-result hidden"></div>
+      </div>
+
+      <div class="contact-info glass">
+        <div class="info-item">
+          <span class="info-icon">◈</span>
+          <div>
+            <div class="info-title">Réseau</div>
+            <div class="info-desc mono">arcacoin.duckdns.org</div>
+          </div>
+        </div>
+        <div class="info-item">
+          <span class="info-icon">⬡</span>
+          <div>
+            <div class="info-title">Version</div>
+            <div class="info-desc">Arca Coin v0.1 — Alpha</div>
+          </div>
+        </div>
+        <div class="info-item">
+          <span class="info-icon">◉</span>
+          <div>
+            <div class="info-title">Statut réseau</div>
+            <div class="info-desc" id="contactStatus">Vérification...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script>
+    checkServerStatus()
+
+    // Pré-remplir l'ID si connecté
+    const user = Session.getUser()
+    if (user?.id) {
+      document.getElementById("contactId").value = user.id
+    }
+
+    // Vérifier le statut pour la section info
+    fetch("https://arcacoin.duckdns.org/price")
+      .then(() => { document.getElementById("contactStatus").textContent = "🟢 En ligne" })
+      .catch(() => { document.getElementById("contactStatus").textContent = "🔴 Hors ligne" })
+
+    // Envoyer message (simulé pour l'instant)
+    document.getElementById("btnSendContact").addEventListener("click", () => {
+      const subject = document.getElementById("contactSubject").value.trim()
+      const message = document.getElementById("contactMessage").value.trim()
+
+      if (!subject || !message) {
+        showToast("Remplis le sujet et le message", "error")
+        return
+      }
+
+      // TODO: brancher sur une vraie route /contact côté serveur
+      const result = document.getElementById("contactResult")
+      result.classList.remove("hidden")
+      result.textContent = "✓ Message reçu ! Nous reviendrons vers toi rapidement."
+      showToast("Message envoyé !", "success")
+
+      document.getElementById("contactSubject").value = ""
+      document.getElementById("contactMessage").value = ""
+    })
+  </script>
+</body>
+</html>

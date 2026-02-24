@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ārcøin — Connexion</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="stylesheet" href="login.css" />
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl-util@0.15.1/nacl-util.min.js"></script>
+  <script src="api.js"></script>
+</head>
+<body>
+
+  <div class="bg-orbs"></div>
+
+  <!-- LOGO -->
+  <div class="login-logo">Ārc<span>ø</span>in</div>
+
+  <!-- CARD -->
+  <div class="login-wrap">
+
+    <!-- TABS -->
+    <div class="login-tabs">
+      <button class="login-tab active" id="tabLogin">Connexion</button>
+      <button class="login-tab" id="tabRegister">Créer un compte</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="formLogin" class="login-form">
+      <div class="input-group">
+        <label>Identifiant</label>
+        <div class="input-wrap">
+          <span class="input-icon">◈</span>
+          <input type="text" id="loginId" placeholder="votre identifiant" autocomplete="username" />
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Mot de passe</label>
+        <div class="input-wrap">
+          <span class="input-icon">◉</span>
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Code 2FA</label>
+        <div class="input-wrap">
+          <span class="input-icon">⬡</span>
+          <input type="text" id="login2FA" placeholder="000000" maxlength="6" inputmode="numeric" />
+        </div>
+        <div class="otp-bar-wrap">
+          <div class="otp-bar"><div class="otp-fill" id="otpFill"></div></div>
+          <span class="otp-time" id="otpTime">30s</span>
+        </div>
+      </div>
+      <button class="btn btn-primary mt" id="btnLogin">Se connecter</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="formRegister" class="login-form hidden">
+
+      <!-- STEP 1 : infos de base -->
+      <div id="step1">
+        <div class="step-label">Étape 1 — Informations</div>
+        <div class="input-group">
+          <label>Identifiant</label>
+          <div class="input-wrap">
+            <span class="input-icon">◈</span>
+            <input type="text" id="regId" placeholder="votre identifiant" />
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Mot de passe</label>
+          <div class="input-wrap">
+            <span class="input-icon">◉</span>
+            <input type="password" id="regPassword" placeholder="8 caractères minimum" />
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Confirmer le mot de passe</label>
+          <div class="input-wrap">
+            <span class="input-icon">◉</span>
+            <input type="password" id="regPasswordConfirm" placeholder="••••••••" />
+          </div>
+        </div>
+        <button class="btn btn-primary mt" id="btnStep1">Suivant →</button>
+      </div>
+
+      <!-- STEP 2 : clés + 2FA -->
+      <div id="step2" class="hidden">
+        <div class="step-label">Étape 2 — Sécurité</div>
+
+        <div class="key-card">
+          <div class="key-card-label">Clé publique</div>
+          <div class="key-value" id="regPubKey">—</div>
+        </div>
+
+        <div class="key-card warn-card mt">
+          <div class="key-card-label">⚠ Clé privée — Sauvegarde-la maintenant</div>
+          <div class="key-value blurred" id="regPrivKey">—</div>
+          <button class="btn btn-ghost btn-sm mt" id="btnRevealPriv">Afficher</button>
+          <button class="btn btn-ghost btn-sm mt" id="btnCopyPriv">Copier</button>
+        </div>
+
+        <div class="divider">Configuration 2FA</div>
+
+        <div id="qrWrap" class="qr-wrap"></div>
+        <div class="secret-box" id="reg2FASecret">—</div>
+        <p class="hint">Scanne ce QR avec Google Authenticator puis entre le code ci-dessous.</p>
+
+        <div class="input-group mt">
+          <label>Code 2FA pour valider</label>
+          <div class="input-wrap">
+            <span class="input-icon">⬡</span>
+            <input type="text" id="reg2FACode" placeholder="000000" maxlength="6" inputmode="numeric" />
+          </div>
+        </div>
+
+        <button class="btn btn-primary mt" id="btnRegisterConfirm">Créer le compte</button>
+        <button class="btn btn-ghost btn-sm mt" id="btnBackStep1">← Retour</button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>

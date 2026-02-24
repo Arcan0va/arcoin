@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ārcøin — Wallet</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="stylesheet" href="wallet.css" />
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl-util@0.15.1/nacl-util.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="api.js"></script>
+</head>
+<body>
+
+  <div class="bg-orbs"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-logo">Ārc<span>ø</span>in</div>
+    <div class="nav-links">
+      <a href="wallet.html" class="nav-link active">Wallet</a>
+      <a href="contact.html" class="nav-link">Contact</a>
+      <a href="settings.html" class="nav-link">Paramètres</a>
+    </div>
+    <div class="nav-right">
+      <div class="status-pill">
+        <div class="status-dot" id="statusDot"></div>
+        <span class="status-text" id="statusText">—</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="btnLogout">Déconnexion</button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="wallet-main">
+
+    <!-- ROW 1 : balance + prix + actions rapides -->
+    <div class="wallet-top">
+
+      <!-- BALANCE CARD -->
+      <div class="glass card-balance">
+        <div class="card-label">Solde total</div>
+        <div class="balance-row">
+          <span class="balance-amount" id="walletBalance">—</span>
+          <span class="balance-unit">ARC</span>
+        </div>
+        <div class="balance-fiat" id="walletFiat">≈ — € / — $</div>
+        <div class="wallet-user" id="walletUser">—</div>
+      </div>
+
+      <!-- PRIX CARD -->
+      <div class="glass card-price">
+        <div class="card-label">Prix Ārcøin</div>
+        <div class="price-row">
+          <span class="price-eur" id="priceEUR">— €</span>
+          <span class="price-sep">/</span>
+          <span class="price-usd" id="priceUSD">— $</span>
+        </div>
+        <div class="price-meta" id="priceMeta">Volume : — ARC</div>
+        <div class="price-chart-wrap">
+          <canvas id="priceChart"></canvas>
+        </div>
+      </div>
+
+      <!-- TRUST CARD -->
+      <div class="glass card-trust">
+        <div class="card-label">Trust Score</div>
+        <div class="trust-circle-wrap">
+          <svg class="trust-circle" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+            <circle cx="40" cy="40" r="34" fill="none" stroke="url(#trustGrad)" stroke-width="6"
+              stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6"
+              id="trustArc" transform="rotate(-90 40 40)"/>
+            <defs>
+              <linearGradient id="trustGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#a78bfa"/>
+                <stop offset="100%" stop-color="#34d399"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="trust-value" id="trustValue">—</span>
+        </div>
+        <div class="trust-label">Score de réputation</div>
+      </div>
+
+    </div>
+
+    <!-- ROW 2 : envoyer + recevoir + historique -->
+    <div class="wallet-bottom">
+
+      <!-- ENVOYER -->
+      <div class="glass card-send">
+        <div class="card-title">Envoyer</div>
+        <div class="input-group">
+          <label>Destinataire</label>
+          <div class="input-wrap">
+            <span class="input-icon">◈</span>
+            <input type="text" id="sendReceiver" placeholder="identifiant du destinataire" />
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Montant (ARC)</label>
+          <input type="number" id="sendAmount" placeholder="100" min="1" />
+        </div>
+        <div class="input-group">
+          <label>Note (optionnel)</label>
+          <input type="text" id="sendNote" placeholder="ex: farm iron" />
+        </div>
+        <div class="input-group">
+          <label>Code 2FA</label>
+          <div class="input-wrap">
+            <span class="input-icon">⬡</span>
+            <input type="text" id="send2FA" placeholder="000000" maxlength="6" inputmode="numeric" />
+          </div>
+          <div class="otp-bar-wrap">
+            <div class="otp-bar"><div class="otp-fill" id="otpFill"></div></div>
+            <span class="otp-time" id="otpTime">30s</span>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="btnSend">Envoyer →</button>
+        <div id="sendResult" class="send-result hidden"></div>
+      </div>
+
+      <!-- RECEVOIR -->
+      <div class="glass card-receive">
+        <div class="card-title">Recevoir</div>
+        <p class="receive-hint">Partage ton identifiant pour recevoir des ARC</p>
+        <div class="receive-id" id="receiveId">—</div>
+        <div class="qr-wrap" id="receiveQR"></div>
+        <button class="btn btn-ghost btn-sm mt" id="btnCopyId">Copier l'identifiant</button>
+      </div>
+
+      <!-- HISTORIQUE -->
+      <div class="glass card-history">
+        <div class="card-title-row">
+          <div class="card-title">Historique</div>
+          <button class="btn btn-ghost btn-sm" id="btnRefreshHistory">↻</button>
+        </div>
+        <div class="history-list" id="historyList">
+          <div class="empty-state">Chargement...</div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="wallet.js"></script>
+</body>
+</html>

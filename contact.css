@@ -1,0 +1,83 @@
+.contact-main {
+  padding: 6rem 2rem 2rem;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.contact-wrap {
+  width: 100%;
+  max-width: 560px;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+  margin-bottom: 0.5rem;
+}
+
+.page-sub {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.contact-card {
+  padding: 1.8rem;
+  border-radius: 20px;
+  margin-bottom: 1.2rem;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.contact-result {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  background: rgba(52,211,153,0.08);
+  border: 1px solid rgba(52,211,153,0.2);
+  color: var(--success);
+}
+
+.contact-info {
+  padding: 1.2rem 1.5rem;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.info-icon {
+  font-size: 1rem;
+  color: var(--accent);
+  margin-top: 0.1rem;
+  min-width: 20px;
+}
+
+.info-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.15rem;
+}
+
+.info-desc {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.info-desc.mono { font-family: var(--mono); }
