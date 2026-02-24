@@ -1,2 +1,2 @@
-# arcoin
-A Crypto Currency for gamers and devs.
+# ===Arcoin===
+## A Crypto Currency for gamers and devs.
