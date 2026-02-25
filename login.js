@@ -27,19 +27,6 @@ document.getElementById("tabRegister").addEventListener("click", function() {
   document.getElementById("formLogin").classList.add("hidden")
 })
 
-// ===== SHOW/HIDE PASSWORD =====
-document.getElementById("btnShowPassword").addEventListener("click", function() {
-  var input = document.getElementById("loginPassword")
-  var btn   = document.getElementById("btnShowPassword")
-  if (input.type === "password") {
-    input.type = "text"
-    btn.textContent = "Hide"
-  } else {
-    input.type = "password"
-    btn.textContent = "Show"
-  }
-})
-
 // ===== LOGIN =====
 document.getElementById("btnLogin").addEventListener("click", async function() {
   var id         = document.getElementById("loginId").value.trim()
