@@ -1,16 +1,28 @@
 // ===== CONFIG =====
 const SERVER = "https://arcacoin.duckdns.org"
 
-// ===== SESSION (memory only — clears on refresh) =====
-window._arcSession = null
-
+// ===== SESSION =====
+// sessionStorage : survit à la navigation entre pages
+// mais disparaît à la fermeture de l'onglet → déconnexion auto ✓
 const Session = {
-  set(token, user)  { window._arcSession = { token, user } },
-  get()             { return window._arcSession },
-  getToken()        { return window._arcSession?.token || null },
-  getUser()         { return window._arcSession?.user || null },
-  clear()           { window._arcSession = null },
-  isLoggedIn()      { return !!window._arcSession?.token }
+  set(token, user) {
+    sessionStorage.setItem("arc_token", token)
+    sessionStorage.setItem("arc_user", JSON.stringify(user))
+  },
+  getToken() {
+    return sessionStorage.getItem("arc_token")
+  },
+  getUser() {
+    const raw = sessionStorage.getItem("arc_user")
+    return raw ? JSON.parse(raw) : null
+  },
+  clear() {
+    sessionStorage.removeItem("arc_token")
+    sessionStorage.removeItem("arc_user")
+  },
+  isLoggedIn() {
+    return !!sessionStorage.getItem("arc_token")
+  }
 }
 
 // ===== API =====
@@ -41,9 +53,9 @@ const API = {
   async login(id, password, token2FA) {
     return this._fetch("/login", { method: "POST", body: JSON.stringify({ id, password, token2FA }) })
   },
-  async getUser(id)    { return this._fetch(`/user/${id}`) },
-  async getLedger()    { return this._fetch("/ledger") },
-  async getPrice()     { return this._fetch("/price") },
+  async getUser(id)  { return this._fetch(`/user/${id}`) },
+  async getLedger()  { return this._fetch("/ledger") },
+  async getPrice()   { return this._fetch("/price") },
   async send(senderId, receiverId, amount, note, signature, token2FA, pubKey) {
     return this._fetch("/send", {
       method: "POST",
@@ -90,7 +102,9 @@ function showToast(msg, type = "info") {
 }
 
 function requireAuth() {
-  if (!Session.isLoggedIn()) window.location.href = "/arcoin/login.html"
+  if (!Session.isLoggedIn()) {
+    window.location.href = "/arcoin/login.html"
+  }
 }
 
 function checkServerStatus() {
