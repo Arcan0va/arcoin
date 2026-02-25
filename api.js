@@ -2,14 +2,9 @@
 const SERVER = "https://arcacoin.duckdns.org"
 
 // ===== SESSION =====
-// JWT + user info : sessionStorage par défaut (disparaît à la fermeture)
-// Si "stay signed in" : localStorage (persiste sur l'appareil)
-// Clé privée : toujours localStorage (persiste, saisie une seule fois)
-
 const Session = {
   set(token, user, staySignedIn = false) {
     const storage = staySignedIn ? localStorage : sessionStorage
-    // Nettoyer l'autre storage
     sessionStorage.removeItem("arc_token")
     sessionStorage.removeItem("arc_user")
     localStorage.removeItem("arc_token")
@@ -18,46 +13,36 @@ const Session = {
     storage.setItem("arc_user", JSON.stringify(user))
     if (staySignedIn) localStorage.setItem("arc_stay", "1")
   },
-
   getToken() {
     return localStorage.getItem("arc_token") || sessionStorage.getItem("arc_token") || null
   },
-
   getUser() {
     try {
       const raw = localStorage.getItem("arc_user") || sessionStorage.getItem("arc_user")
       return raw ? JSON.parse(raw) : null
     } catch { return null }
   },
-
   isStaySignedIn() {
     return !!localStorage.getItem("arc_stay")
   },
-
   clear() {
     sessionStorage.removeItem("arc_token")
     sessionStorage.removeItem("arc_user")
     localStorage.removeItem("arc_token")
     localStorage.removeItem("arc_user")
     localStorage.removeItem("arc_stay")
-    // Ne pas supprimer la clé privée au logout — elle reste sur l'appareil
   },
-
   isLoggedIn() {
     return !!(localStorage.getItem("arc_token") || sessionStorage.getItem("arc_token"))
   },
-
-  // Clé privée — toujours localStorage, liée à l'ID utilisateur
   savePrivKey(userId, privKey) {
-    localStorage.setItem(`arc_privkey_${userId}`, privKey)
+    localStorage.setItem("arc_privkey_" + userId, privKey)
   },
-
   getPrivKey(userId) {
-    return localStorage.getItem(`arc_privkey_${userId}`) || null
+    return localStorage.getItem("arc_privkey_" + userId) || null
   },
-
   deletePrivKey(userId) {
-    localStorage.removeItem(`arc_privkey_${userId}`)
+    localStorage.removeItem("arc_privkey_" + userId)
   }
 }
 
@@ -66,10 +51,10 @@ const API = {
   async _fetch(path, options = {}) {
     const token = Session.getToken()
     const headers = { "Content-Type": "application/json", ...options.headers }
-    if (token) headers["Authorization"] = `Bearer ${token}`
+    if (token) headers["Authorization"] = "Bearer " + token
 
     try {
-      const res  = await fetch(`${SERVER}${path}`, { ...options, headers })
+      const res  = await fetch(SERVER + path, { ...options, headers })
       const data = await res.json()
       if (res.status === 401) {
         Session.clear()
@@ -77,19 +62,18 @@ const API = {
         return null
       }
       return data
-    } catch {
+    } catch(e) {
       showToast("Server unreachable", "error")
       return null
     }
   },
-
   async register(id, pubKey, password) {
     return this._fetch("/register", { method: "POST", body: JSON.stringify({ id, pubKey, password }) })
   },
   async login(id, password, token2FA) {
     return this._fetch("/login", { method: "POST", body: JSON.stringify({ id, password, token2FA }) })
   },
-  async getUser(id)  { return this._fetch(`/user/${id}`) },
+  async getUser(id)  { return this._fetch("/user/" + id) },
   async getLedger()  { return this._fetch("/ledger") },
   async getPrice()   { return this._fetch("/price") },
   async send(senderId, receiverId, amount, note, signature, token2FA, pubKey) {
@@ -115,52 +99,41 @@ const Crypto = {
       privKey: nacl.util.encodeBase64(kp.secretKey)
     }
   },
-  getKeyPairFromPriv(privBase64) {
-    return nacl.sign.keyPair.fromSecretKey(nacl.util.decodeBase64(privBase64))
-  },
   sign(senderId, receiverId, amount, note, privBase64) {
-    const kp   = this.getKeyPairFromPriv(privBase64)
-    const data = {
-      SENDER:   { ID: senderId, QUANTITY: amount, NOTE: note || "" },
-      RECEIVER: { ID: receiverId }
-    }
-    const sig = nacl.sign.detached(nacl.util.decodeUTF8(JSON.stringify(data)), kp.secretKey)
+    const kp   = nacl.sign.keyPair.fromSecretKey(nacl.util.decodeBase64(privBase64))
+    const data = { SENDER: { ID: senderId, QUANTITY: amount, NOTE: note || "" }, RECEIVER: { ID: receiverId } }
+    const sig  = nacl.sign.detached(nacl.util.decodeUTF8(JSON.stringify(data)), kp.secretKey)
     return nacl.util.encodeBase64(sig)
   }
 }
 
 // ===== UTILS =====
-function showToast(msg, type = "info") {
+function showToast(msg, type) {
+  type = type || "info"
   let t = document.getElementById("toast")
-  if (!t) {
-    t = document.createElement("div")
-    t.id = "toast"
-    document.body.appendChild(t)
-  }
+  if (!t) { t = document.createElement("div"); t.id = "toast"; document.body.appendChild(t) }
   t.textContent = msg
-  t.className = `toast ${type}`
+  t.className = "toast " + type
   t.classList.remove("hidden")
   clearTimeout(t._timer)
-  t._timer = setTimeout(() => t.classList.add("hidden"), 3500)
+  t._timer = setTimeout(function() { t.classList.add("hidden") }, 3500)
 }
 
 function requireAuth() {
-  if (!Session.isLoggedIn()) {
-    window.location.href = "login.html"
-  }
+  if (!Session.isLoggedIn()) window.location.href = "login.html"
 }
 
 function checkServerStatus() {
-  fetch(`${SERVER}/price`)
-    .then(() => {
-      const dot  = document.querySelector(".status-dot")
-      const text = document.querySelector(".status-text")
+  fetch(SERVER + "/price")
+    .then(function() {
+      var dot  = document.querySelector(".status-dot")
+      var text = document.querySelector(".status-text")
       if (dot)  dot.classList.add("online")
       if (text) text.textContent = "ONLINE"
     })
-    .catch(() => {
-      const dot  = document.querySelector(".status-dot")
-      const text = document.querySelector(".status-text")
+    .catch(function() {
+      var dot  = document.querySelector(".status-dot")
+      var text = document.querySelector(".status-text")
       if (dot)  dot.classList.remove("online")
       if (text) text.textContent = "OFFLINE"
     })
