@@ -6,11 +6,6 @@
   <title>Ārcøin — Wallet</title>
   <link rel="stylesheet" href="shared.css" />
   <link rel="stylesheet" href="wallet.css" />
-  <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tweetnacl-util@0.15.1/nacl-util.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="api.js"></script>
 </head>
 <body>
 
@@ -25,8 +20,8 @@
     </div>
     <div class="nav-right">
       <div class="status-pill">
-        <div class="status-dot" id="statusDot"></div>
-        <span class="status-text" id="statusText">—</span>
+        <div class="status-dot"></div>
+        <span class="status-text">—</span>
       </div>
       <button class="btn btn-ghost btn-sm" id="btnLogout">Sign Out</button>
     </div>
@@ -34,56 +29,40 @@
 
   <main class="wallet-main">
 
-    <!-- ROW 1 -->
-    <div class="wallet-top">
+    <div class="wallet-grid">
 
+      <!-- BALANCE -->
       <div class="glass card-balance">
-        <div class="card-label">Total Balance</div>
-        <div class="balance-row">
-          <span class="balance-amount" id="walletBalance">—</span>
-          <span class="balance-unit">ARC</span>
-        </div>
-        <div class="balance-fiat" id="walletFiat">≈ — € / — $</div>
+        <div class="card-title">Your Balance</div>
+        <div class="balance-amount"><span id="walletBalance">—</span> <span class="balance-unit">ARC</span></div>
+        <div class="balance-fiat" id="walletFiat">—</div>
         <div class="wallet-user" id="walletUser">—</div>
       </div>
 
+      <!-- PRICE -->
       <div class="glass card-price">
-        <div class="card-label">Ārcøin Price</div>
+        <div class="card-title">ARC Price</div>
         <div class="price-row">
-          <span class="price-eur" id="priceEUR">— €</span>
-          <span class="price-sep">/</span>
-          <span class="price-usd" id="priceUSD">— $</span>
+          <span class="price-val" id="priceEUR">—</span>
+          <span class="price-val" id="priceUSD">—</span>
         </div>
-        <div class="price-meta" id="priceMeta">Volume: — ARC</div>
-        <div class="price-chart-wrap">
+        <div class="price-meta" id="priceMeta">—</div>
+        <div class="chart-wrap">
           <canvas id="priceChart"></canvas>
         </div>
       </div>
 
+      <!-- TRUST -->
       <div class="glass card-trust">
-        <div class="card-label">Trust Score</div>
-        <div class="trust-circle-wrap">
-          <svg class="trust-circle" viewBox="0 0 80 80">
-            <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
-            <circle cx="40" cy="40" r="34" fill="none" stroke="url(#trustGrad)" stroke-width="6"
-              stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6"
-              id="trustArc" transform="rotate(-90 40 40)"/>
-            <defs>
-              <linearGradient id="trustGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#a78bfa"/>
-                <stop offset="100%" stop-color="#34d399"/>
-              </linearGradient>
-            </defs>
+        <div class="card-title">Reputation Score</div>
+        <div class="trust-circle">
+          <svg viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="34" class="trust-bg"/>
+            <circle cx="40" cy="40" r="34" class="trust-arc" id="trustArc"/>
           </svg>
-          <span class="trust-value" id="trustValue">—</span>
+          <div class="trust-val" id="trustValue">—</div>
         </div>
-        <div class="trust-label">Reputation score</div>
       </div>
-
-    </div>
-
-    <!-- ROW 2 -->
-    <div class="wallet-bottom">
 
       <!-- SEND -->
       <div class="glass card-send">
@@ -123,8 +102,8 @@
       <div class="glass card-receive">
         <div class="card-title">Receive ARC</div>
         <p class="receive-hint">Share your username so others can send you ARC</p>
-        <div class="receive-id" id="receiveId">—</div>
         <div class="qr-wrap" id="receiveQR"></div>
+        <div class="receive-id" id="receiveId">—</div>
         <button class="btn btn-ghost btn-sm mt" id="btnCopyId">Copy username</button>
       </div>
 
@@ -132,7 +111,7 @@
       <div class="glass card-history">
         <div class="card-title-row">
           <div class="card-title">Transaction History</div>
-          <button class="btn btn-ghost btn-sm" id="btnRefreshHistory">↻</button>
+          <button class="btn btn-ghost btn-sm" id="btnRefreshHistory">↺</button>
         </div>
         <div class="history-list" id="historyList">
           <div class="empty-state">Loading...</div>
@@ -144,9 +123,10 @@
   </main>
 
   <div id="toast" class="toast hidden"></div>
+
   <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tweetnacl-util@0.15.1/nacl-util.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="api.js"></script>
   <script src="wallet.js"></script>
