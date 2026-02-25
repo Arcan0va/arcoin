@@ -47,8 +47,13 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
   btn.disabled = false
   btn.textContent = "Sign In"
 
-  if (!data || !data.success) {
-    showToast(data?.error || "Server error", "error")
+  if (!data) {
+    showToast("Server unreachable", "error")
+    return
+  }
+
+  if (!data.success) {
+    showToast(data.error || "Login failed", "error")
     return
   }
 
@@ -64,7 +69,6 @@ document.getElementById("login2FA").addEventListener("keydown", e => {
 let regKeys      = null
 let reg2FASecret = null
 let regId        = null
-let regPassword  = null
 
 document.getElementById("btnStep1").addEventListener("click", async () => {
   const id      = document.getElementById("regId").value.trim()
@@ -77,21 +81,23 @@ document.getElementById("btnStep1").addEventListener("click", async () => {
 
   const btn = document.getElementById("btnStep1")
   btn.disabled = true
-  btn.textContent = "Creating account..."
+  btn.textContent = "Creating..."
 
-  // Générer les clés
-  regKeys    = Crypto.generateKeys()
-  regId      = id
-  regPassword = pass
+  regKeys = Crypto.generateKeys()
+  regId   = id
 
-  // Register sur le serveur — on attend la réponse complète
   const data = await API.register(id, regKeys.pubKey, pass)
 
   btn.disabled = false
   btn.textContent = "Next →"
 
-  if (!data || !data.success) {
-    showToast(data?.error || "Server error", "error")
+  if (!data) {
+    showToast("Server unreachable", "error")
+    return
+  }
+
+  if (!data.success) {
+    showToast(data.error || "Registration failed", "error")
     return
   }
 
@@ -101,14 +107,14 @@ document.getElementById("btnStep1").addEventListener("click", async () => {
   document.getElementById("regPubKey").textContent  = regKeys.pubKey
   document.getElementById("regPrivKey").textContent = regKeys.privKey
 
-  // Passer au step 2 — div maintenant visible dans le DOM
+  // Passer au step 2
   document.getElementById("step1").classList.add("hidden")
   document.getElementById("step2").classList.remove("hidden")
 
-  // Afficher le secret en texte
+  // Afficher le secret
   document.getElementById("reg2FASecret").textContent = reg2FASecret
 
-  // Générer le QR — le div est visible maintenant
+  // Générer le QR
   document.getElementById("qrWrap").innerHTML = ""
   const otpUrl = `otpauth://totp/${id}?secret=${reg2FASecret}&issuer=ArcaCoin`
   new QRCode(document.getElementById("qrWrap"), {
@@ -116,7 +122,7 @@ document.getElementById("btnStep1").addEventListener("click", async () => {
     colorDark: "#000", colorLight: "#fff"
   })
 
-  showToast("Account created! Scan the QR code.", "success")
+  showToast("Account created! Scan the QR code then sign in.", "success")
 })
 
 document.getElementById("btnBackStep1").addEventListener("click", () => {
@@ -136,41 +142,26 @@ document.getElementById("btnCopyPriv").addEventListener("click", () => {
   showToast("Private key copied!", "success")
 })
 
-// Confirmer 2FA + se connecter
-document.getElementById("btnRegisterConfirm").addEventListener("click", async () => {
-  const code2FA = document.getElementById("reg2FACode").value.trim()
-
-  if (!code2FA)      { showToast("Enter the 2FA code", "error"); return }
-  if (!reg2FASecret) { showToast("Please wait for QR code", "error"); return }
-
-  const btn = document.getElementById("btnRegisterConfirm")
-  btn.disabled = true
-  btn.textContent = "Connecting..."
-
-  const loginData = await API.login(regId, regPassword, code2FA)
-
-  btn.disabled = false
-  btn.textContent = "Create Account"
-
-  if (!loginData || !loginData.success) {
-    showToast(loginData?.error || "Invalid 2FA code — try again", "error")
+// Bouton "Create Account" = juste basculer vers Sign In
+document.getElementById("btnRegisterConfirm").addEventListener("click", () => {
+  if (!reg2FASecret) {
+    showToast("Please wait for QR code", "error")
     return
   }
 
-  // Stocker session avec clé privée
-  Session.set(loginData.token, {
-    ...loginData.user,
-    privKey: regKeys.privKey
-  })
+  // Pré-remplir l'ID dans le formulaire login
+  document.getElementById("loginId").value = regId || ""
 
-  window.location.href = "wallet.html"
+  // Basculer vers Sign In
+  document.getElementById("tabLogin").click()
+
+  showToast("Now scan the QR, then sign in!", "success")
 })
 
 // ===== INIT =====
 startOTPCountdown()
 checkServerStatus()
 
-// Si déjà connecté, aller direct au wallet
 if (Session.isLoggedIn()) {
   window.location.href = "wallet.html"
 }
