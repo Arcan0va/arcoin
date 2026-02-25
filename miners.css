@@ -1,0 +1,270 @@
+.miners-main {
+  padding: 6rem 2rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-hi);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.miners-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.2rem;
+}
+
+@media (max-width: 900px) {
+  .miners-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 600px) {
+  .miners-grid { grid-template-columns: 1fr; }
+}
+
+.miners-card {
+  padding: 1.5rem;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.miners-card-full {
+  grid-column: 1 / -1;
+}
+
+.miners-card-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.2rem;
+}
+
+.miners-hint {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* THREAD DISPLAY */
+.thread-display {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.thread-big {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.thread-label {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin-top: 0.3rem;
+}
+
+/* BREAKDOWN */
+.thread-breakdown {
+  background: rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
+.breakdown-row.total {
+  color: var(--text-hi);
+  font-weight: 600;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 0.4rem;
+  margin-top: 0.2rem;
+}
+
+/* DEVICES */
+.device-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+@media (max-width: 600px) {
+  .device-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.device-card {
+  background: rgba(167,139,250,0.05);
+  border: 1px solid rgba(167,139,250,0.1);
+  border-radius: 12px;
+  padding: 0.8rem;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.device-card:hover { border-color: rgba(167,139,250,0.3); }
+
+.device-icon { font-size: 1.2rem; margin-bottom: 0.3rem; }
+.device-name { font-size: 0.72rem; font-weight: 600; color: var(--text-hi); }
+.device-threads { font-size: 0.65rem; color: var(--text-dim); margin-bottom: 0.3rem; }
+.device-count { font-size: 0.78rem; color: var(--accent); font-weight: 600; font-family: var(--mono); }
+
+/* PACKS */
+.packs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pack-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+}
+
+.pack-name { font-size: 0.9rem; font-weight: 600; color: var(--text-hi); }
+.pack-price { font-size: 0.75rem; color: var(--accent); font-family: var(--mono); }
+
+.pack-counter {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pack-qty {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-hi);
+  min-width: 24px;
+  text-align: center;
+}
+
+.pack-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  padding: 0.3rem 0.2rem;
+}
+
+.pack-total-row span:last-child {
+  color: var(--text-hi);
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
+/* BALANCE MINI */
+.balance-mini {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-hi);
+}
+
+.packs-bought-info {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+/* FIRMWARE */
+.firmware-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.firmware-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  gap: 1rem;
+  transition: border-color 0.2s;
+}
+
+.firmware-item:hover { border-color: rgba(167,139,250,0.2); }
+
+.firmware-name { font-size: 0.88rem; font-weight: 600; color: var(--text-hi); margin-bottom: 0.2rem; }
+.firmware-desc { font-size: 0.72rem; color: var(--text-dim); margin-bottom: 0.3rem; }
+.firmware-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-family: var(--mono);
+  color: var(--accent);
+  background: rgba(167,139,250,0.1);
+  border: 1px solid rgba(167,139,250,0.15);
+  border-radius: 100px;
+  padding: 0.15rem 0.5rem;
+}
+
+.firmware-btn { white-space: nowrap; flex-shrink: 0; }
+
+/* INFO BLOCKS */
+.info-blocks {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .info-blocks { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .info-blocks { grid-template-columns: 1fr; }
+}
+
+.info-block {
+  background: rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.info-block-title { font-size: 0.85rem; font-weight: 600; color: var(--text-hi); margin-bottom: 0.5rem; }
+.info-block-body  { font-size: 0.78rem; color: var(--text-dim); line-height: 1.6; }
+
+/* SEND RESULT */
+.send-result {
+  margin-top: 0.5rem;
+  padding: 0.8rem;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  font-family: var(--mono);
+}
+.send-result.success { background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2); color: var(--success); }
+.send-result.error   { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); color: var(--danger); }
+
+.divider {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin: 0.5rem 0;
+}
+
+.mt { margin-top: 0.5rem; }

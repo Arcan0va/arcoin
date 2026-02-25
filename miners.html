@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ārcøin — Miners</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="stylesheet" href="miners.css" />
+</head>
+<body>
+
+  <div class="bg-orbs"></div>
+
+  <nav class="navbar">
+    <div class="nav-logo">Ārc<span>ø</span>in</div>
+    <div class="nav-links">
+      <a href="wallet.html" class="nav-link">Wallet</a>
+      <a href="miners.html" class="nav-link active">Miners</a>
+      <a href="contact.html" class="nav-link">Contact</a>
+      <a href="settings.html" class="nav-link">Settings</a>
+    </div>
+    <div class="nav-right">
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        <span class="status-text">—</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="btnLogout">Sign Out</button>
+    </div>
+  </nav>
+
+  <main class="miners-main">
+
+    <h1 class="page-title">Miners</h1>
+
+    <div class="miners-grid">
+
+      <!-- THREAD LIMIT -->
+      <div class="glass miners-card">
+        <div class="miners-card-title">Your Mining Limit</div>
+
+        <div class="thread-display">
+          <div class="thread-big" id="threadCurrent">—</div>
+          <div class="thread-label">threads available</div>
+        </div>
+
+        <div class="thread-breakdown">
+          <div class="breakdown-row">
+            <span>Base (Trust score)</span>
+            <span id="threadBase">—</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Purchased</span>
+            <span id="threadBought">—</span>
+          </div>
+          <div class="breakdown-row total">
+            <span>Total</span>
+            <span id="threadTotal">—</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="miners-card-title" style="margin-top:0">Equivalent Devices</div>
+        <div class="device-grid">
+          <div class="device-card">
+            <div class="device-icon">⚡</div>
+            <div class="device-name">ESP32</div>
+            <div class="device-threads">2 threads</div>
+            <div class="device-count" id="esp32Count">— max</div>
+          </div>
+          <div class="device-card">
+            <div class="device-icon">🥧</div>
+            <div class="device-name">Pi Zero / 1</div>
+            <div class="device-threads">1 thread</div>
+            <div class="device-count" id="piZeroCount">— max</div>
+          </div>
+          <div class="device-card">
+            <div class="device-icon">🥧</div>
+            <div class="device-name">Pi 2 / 3</div>
+            <div class="device-threads">2 threads</div>
+            <div class="device-count" id="pi23Count">— max</div>
+          </div>
+          <div class="device-card">
+            <div class="device-icon">🥧</div>
+            <div class="device-name">Pi 4</div>
+            <div class="device-threads">4 threads</div>
+            <div class="device-count" id="pi4Count">— max</div>
+          </div>
+          <div class="device-card">
+            <div class="device-icon">🥧</div>
+            <div class="device-name">Pi 5</div>
+            <div class="device-threads">8 threads</div>
+            <div class="device-count" id="pi5Count">— max</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUY THREADS -->
+      <div class="glass miners-card">
+        <div class="miners-card-title">Buy More Threads</div>
+        <p class="miners-hint">Each pack gives +25 threads. Max 5 packs per tier.</p>
+
+        <div class="packs-list">
+          <div class="pack-row" id="packRow">
+            <div class="pack-info">
+              <div class="pack-name">+25 Threads</div>
+              <div class="pack-price">10,000 ARC</div>
+            </div>
+            <div class="pack-counter">
+              <button class="btn btn-ghost btn-sm" id="packMinus">−</button>
+              <span class="pack-qty" id="packQty">0</span>
+              <button class="btn btn-ghost btn-sm" id="packPlus">+</button>
+            </div>
+          </div>
+          <div class="pack-total-row">
+            <span>Total</span>
+            <span id="packTotal">0 ARC</span>
+          </div>
+        </div>
+
+        <div class="input-group mt">
+          <label>2FA Code to confirm purchase</label>
+          <div class="input-wrap">
+            <span class="input-icon">⬡</span>
+            <input type="text" id="buy2FA" placeholder="000000" maxlength="6" inputmode="numeric" />
+          </div>
+        </div>
+
+        <button class="btn btn-primary mt" id="btnBuyThreads">Buy Threads</button>
+        <div id="buyResult" class="send-result hidden"></div>
+
+        <div class="divider"></div>
+
+        <div class="miners-card-title" style="margin-top:0">Your Balance</div>
+        <div class="balance-mini">
+          <span id="minersBalance">—</span>
+          <span class="balance-unit">ARC</span>
+        </div>
+        <div class="packs-bought-info">
+          Packs purchased: <span id="packsBought">—</span> / 5
+        </div>
+      </div>
+
+      <!-- DOWNLOAD FIRMWARE -->
+      <div class="glass miners-card">
+        <div class="miners-card-title">Download Firmware</div>
+        <p class="miners-hint">Flash your device with the official Ārcøin miner firmware. Connect to your node and start earning ARC.</p>
+
+        <div class="firmware-list">
+          <div class="firmware-item">
+            <div class="firmware-info">
+              <div class="firmware-name">⚡ ESP32 Firmware</div>
+              <div class="firmware-desc">Compatible with ESP32, ESP32-S2, ESP32-S3, ESP32-C3</div>
+              <div class="firmware-badge">PoW · Dual Core · 2 threads</div>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm firmware-btn">Download .bin</a>
+          </div>
+
+          <div class="firmware-item">
+            <div class="firmware-info">
+              <div class="firmware-name">🥧 Raspberry Pi Zero / 1</div>
+              <div class="firmware-desc">Single core, WiFi required</div>
+              <div class="firmware-badge">PoW · 1 thread</div>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm firmware-btn">Download .img</a>
+          </div>
+
+          <div class="firmware-item">
+            <div class="firmware-info">
+              <div class="firmware-name">🥧 Raspberry Pi 2 / 3</div>
+              <div class="firmware-desc">Quad core, WiFi required (Pi 3) or USB dongle (Pi 2)</div>
+              <div class="firmware-badge">PoW · 2 threads</div>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm firmware-btn">Download .img</a>
+          </div>
+
+          <div class="firmware-item">
+            <div class="firmware-info">
+              <div class="firmware-name">🥧 Raspberry Pi 4</div>
+              <div class="firmware-desc">Quad core, built-in WiFi, recommended</div>
+              <div class="firmware-badge">PoW · 4 threads</div>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm firmware-btn">Download .img</a>
+          </div>
+
+          <div class="firmware-item">
+            <div class="firmware-info">
+              <div class="firmware-name">🥧 Raspberry Pi 5</div>
+              <div class="firmware-desc">Octa core, built-in WiFi, max performance</div>
+              <div class="firmware-badge">PoW · 8 threads</div>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm firmware-btn">Download .img</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- MINING INFO -->
+      <div class="glass miners-card miners-card-full">
+        <div class="miners-card-title">How Mining Works</div>
+        <div class="info-blocks">
+          <div class="info-block">
+            <div class="info-block-title">⛏ Proof of Work</div>
+            <div class="info-block-body">Your device solves a SHA hash challenge. The NUC boss node verifies the result and rewards you with ARC.</div>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title">💰 Rewards</div>
+            <div class="info-block-body">0.25 ARC per block mined. Minodes (miner + node) earn 0.75 ARC. Halving of 20% every 10 months.</div>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title">🔒 Thread Limit</div>
+            <div class="info-block-body">Your trust score defines your base thread limit. Buy extra packs with ARC to unlock more mining power.</div>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title">📈 Trust = Power</div>
+            <div class="info-block-body">50 trust → 10 threads · 100 trust → 25 threads · 150 trust → 50 threads. Grow your reputation to mine more.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl-util@0.15.1/nacl-util.min.js"></script>
+  <script src="api.js"></script>
+  <script src="miners.js"></script>
+</body>
+</html>
