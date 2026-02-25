@@ -2,23 +2,23 @@
 const SERVER = "https://arcacoin.duckdns.org"
 
 // ===== SESSION =====
-// sessionStorage : survit à la navigation entre pages
-// mais disparaît à la fermeture de l'onglet → déconnexion auto ✓
+// sessionStorage : survit à la navigation, disparaît à la fermeture de l'onglet
 const Session = {
   set(token, user) {
     sessionStorage.setItem("arc_token", token)
     sessionStorage.setItem("arc_user", JSON.stringify(user))
   },
   getToken() {
-    return sessionStorage.getItem("arc_token")
+    return sessionStorage.getItem("arc_token") || null
   },
   getUser() {
-    const raw = sessionStorage.getItem("arc_user")
-    return raw ? JSON.parse(raw) : null
+    try {
+      const raw = sessionStorage.getItem("arc_user")
+      return raw ? JSON.parse(raw) : null
+    } catch { return null }
   },
   clear() {
-    sessionStorage.removeItem("arc_token")
-    sessionStorage.removeItem("arc_user")
+    sessionStorage.clear()
   },
   isLoggedIn() {
     return !!sessionStorage.getItem("arc_token")
@@ -37,21 +37,27 @@ const API = {
       const data = await res.json()
       if (res.status === 401) {
         Session.clear()
-        window.location.href = "/arcoin/login.html"
+        window.location.href = "login.html"
         return null
       }
       return data
-    } catch {
+    } catch(e) {
       showToast("Server unreachable", "error")
       return null
     }
   },
 
   async register(id, pubKey, password) {
-    return this._fetch("/register", { method: "POST", body: JSON.stringify({ id, pubKey, password }) })
+    return this._fetch("/register", {
+      method: "POST",
+      body: JSON.stringify({ id, pubKey, password })
+    })
   },
   async login(id, password, token2FA) {
-    return this._fetch("/login", { method: "POST", body: JSON.stringify({ id, password, token2FA }) })
+    return this._fetch("/login", {
+      method: "POST",
+      body: JSON.stringify({ id, password, token2FA })
+    })
   },
   async getUser(id)  { return this._fetch(`/user/${id}`) },
   async getLedger()  { return this._fetch("/ledger") },
@@ -84,8 +90,11 @@ const Crypto = {
   },
   sign(senderId, receiverId, amount, note, privBase64) {
     const kp   = this.getKeyPairFromPriv(privBase64)
-    const data = { SENDER: { ID: senderId, QUANTITY: amount, NOTE: note || "" }, RECEIVER: { ID: receiverId } }
-    const sig  = nacl.sign.detached(nacl.util.decodeUTF8(JSON.stringify(data)), kp.secretKey)
+    const data = {
+      SENDER:   { ID: senderId, QUANTITY: amount, NOTE: note || "" },
+      RECEIVER: { ID: receiverId }
+    }
+    const sig = nacl.sign.detached(nacl.util.decodeUTF8(JSON.stringify(data)), kp.secretKey)
     return nacl.util.encodeBase64(sig)
   }
 }
@@ -93,7 +102,11 @@ const Crypto = {
 // ===== UTILS =====
 function showToast(msg, type = "info") {
   let t = document.getElementById("toast")
-  if (!t) { t = document.createElement("div"); t.id = "toast"; document.body.appendChild(t) }
+  if (!t) {
+    t = document.createElement("div")
+    t.id = "toast"
+    document.body.appendChild(t)
+  }
   t.textContent = msg
   t.className = `toast ${type}`
   t.classList.remove("hidden")
@@ -103,7 +116,7 @@ function showToast(msg, type = "info") {
 
 function requireAuth() {
   if (!Session.isLoggedIn()) {
-    window.location.href = "/arcoin/login.html"
+    window.location.href = "login.html"
   }
 }
 

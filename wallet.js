@@ -1,5 +1,8 @@
 // ===== AUTH CHECK =====
-requireAuth()
+// Si pas connecté → login
+if (!Session.isLoggedIn()) {
+  window.location.href = "login.html"
+}
 
 const user   = Session.getUser()
 const userId = user?.id
@@ -7,10 +10,9 @@ let privKey  = user?.privKey || null
 let priceHistory = []
 
 // ===== INIT UI =====
-document.getElementById("walletUser").textContent = userId || "—"
-document.getElementById("receiveId").textContent  = userId || "—"
-
 if (userId) {
+  document.getElementById("walletUser").textContent = userId
+  document.getElementById("receiveId").textContent  = userId
   new QRCode(document.getElementById("receiveQR"), {
     text: userId, width: 120, height: 120,
     colorDark: "#000", colorLight: "#fff"
@@ -72,7 +74,7 @@ function updateChart(price) {
   if (!chart) return
   priceHistory.push(price)
   if (priceHistory.length > 20) priceHistory.shift()
-  chart.data.labels   = priceHistory.map((_, i) => i)
+  chart.data.labels = priceHistory.map((_, i) => i)
   chart.data.datasets[0].data = priceHistory
   chart.update()
 }
@@ -105,13 +107,11 @@ async function loadHistory() {
     list.innerHTML = '<div class="empty-state">Unable to load</div>'
     return
   }
-
   const txs = [...data.transactions].reverse()
   if (txs.length === 0) {
     list.innerHTML = '<div class="empty-state">No transactions yet</div>'
     return
   }
-
   list.innerHTML = txs.map(tx => `
     <div class="tx-item">
       <div class="tx-row">
@@ -129,16 +129,19 @@ async function loadHistory() {
 
 // ===== SEND =====
 document.getElementById("btnSend").addEventListener("click", async () => {
-  if (!privKey) { showToast("Private key missing — please sign in again", "error"); return }
+  if (!privKey) {
+    showToast("Private key missing — please sign in again", "error")
+    return
+  }
 
   const receiverId = document.getElementById("sendReceiver").value.trim()
   const amount     = parseInt(document.getElementById("sendAmount").value)
   const note       = document.getElementById("sendNote").value.trim()
   const token2FA   = document.getElementById("send2FA").value.trim()
 
-  if (!receiverId)           { showToast("Enter a recipient", "error"); return }
+  if (!receiverId)            { showToast("Enter a recipient", "error"); return }
   if (!amount || amount <= 0) { showToast("Invalid amount", "error"); return }
-  if (!token2FA)             { showToast("Enter your 2FA code", "error"); return }
+  if (!token2FA)              { showToast("Enter your 2FA code", "error"); return }
 
   const signature = Crypto.sign(userId, receiverId, amount, note, privKey)
 
@@ -194,7 +197,10 @@ async function init() {
   initChart()
   await loadBalance()
   await loadHistory()
-  setInterval(async () => { await loadBalance(); checkServerStatus() }, 60000)
+  setInterval(async () => {
+    await loadBalance()
+    checkServerStatus()
+  }, 60000)
 }
 
 init()

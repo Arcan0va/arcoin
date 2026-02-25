@@ -33,7 +33,10 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
   const password = document.getElementById("loginPassword").value
   const token2FA = document.getElementById("login2FA").value.trim()
 
-  if (!id || !password || !token2FA) { showToast("Please fill in all fields", "error"); return }
+  if (!id || !password || !token2FA) {
+    showToast("Please fill in all fields", "error")
+    return
+  }
 
   const btn = document.getElementById("btnLogin")
   btn.disabled = true
@@ -44,7 +47,10 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
   btn.disabled = false
   btn.textContent = "Sign In"
 
-  if (!data || !data.success) { showToast(data?.error || "Server error", "error"); return }
+  if (!data || !data.success) {
+    showToast(data?.error || "Server error", "error")
+    return
+  }
 
   Session.set(data.token, data.user)
   window.location.href = "wallet.html"
@@ -57,8 +63,9 @@ document.getElementById("login2FA").addEventListener("keydown", e => {
 // ===== REGISTER =====
 let regKeys      = null
 let reg2FASecret = null
+let regId        = null
+let regPassword  = null
 
-// STEP 1 → STEP 2
 document.getElementById("btnStep1").addEventListener("click", async () => {
   const id      = document.getElementById("regId").value.trim()
   const pass    = document.getElementById("regPassword").value
@@ -70,12 +77,14 @@ document.getElementById("btnStep1").addEventListener("click", async () => {
 
   const btn = document.getElementById("btnStep1")
   btn.disabled = true
-  btn.textContent = "Creating..."
+  btn.textContent = "Creating account..."
 
   // Générer les clés
-  regKeys = Crypto.generateKeys()
+  regKeys    = Crypto.generateKeys()
+  regId      = id
+  regPassword = pass
 
-  // Register sur le serveur — on attend la réponse
+  // Register sur le serveur — on attend la réponse complète
   const data = await API.register(id, regKeys.pubKey, pass)
 
   btn.disabled = false
@@ -92,14 +101,14 @@ document.getElementById("btnStep1").addEventListener("click", async () => {
   document.getElementById("regPubKey").textContent  = regKeys.pubKey
   document.getElementById("regPrivKey").textContent = regKeys.privKey
 
-  // Passer au step 2 — div maintenant visible
+  // Passer au step 2 — div maintenant visible dans le DOM
   document.getElementById("step1").classList.add("hidden")
   document.getElementById("step2").classList.remove("hidden")
 
-  // Afficher le secret 2FA en texte
+  // Afficher le secret en texte
   document.getElementById("reg2FASecret").textContent = reg2FASecret
 
-  // Générer le QR — step2 est visible, ça marche
+  // Générer le QR — le div est visible maintenant
   document.getElementById("qrWrap").innerHTML = ""
   const otpUrl = `otpauth://totp/${id}?secret=${reg2FASecret}&issuer=ArcaCoin`
   new QRCode(document.getElementById("qrWrap"), {
@@ -107,7 +116,7 @@ document.getElementById("btnStep1").addEventListener("click", async () => {
     colorDark: "#000", colorLight: "#fff"
   })
 
-  showToast("Account created! Scan the QR code now.", "success")
+  showToast("Account created! Scan the QR code.", "success")
 })
 
 document.getElementById("btnBackStep1").addEventListener("click", () => {
@@ -115,7 +124,6 @@ document.getElementById("btnBackStep1").addEventListener("click", () => {
   document.getElementById("step1").classList.remove("hidden")
 })
 
-// Reveal clé privée
 document.getElementById("btnRevealPriv").addEventListener("click", () => {
   const el = document.getElementById("regPrivKey")
   el.classList.toggle("revealed")
@@ -123,7 +131,6 @@ document.getElementById("btnRevealPriv").addEventListener("click", () => {
     el.classList.contains("revealed") ? "Hide" : "Show"
 })
 
-// Copier clé privée
 document.getElementById("btnCopyPriv").addEventListener("click", () => {
   navigator.clipboard.writeText(regKeys?.privKey || "")
   showToast("Private key copied!", "success")
@@ -131,18 +138,16 @@ document.getElementById("btnCopyPriv").addEventListener("click", () => {
 
 // Confirmer 2FA + se connecter
 document.getElementById("btnRegisterConfirm").addEventListener("click", async () => {
-  const id       = document.getElementById("regId").value.trim()
-  const password = document.getElementById("regPassword").value
-  const code2FA  = document.getElementById("reg2FACode").value.trim()
+  const code2FA = document.getElementById("reg2FACode").value.trim()
 
-  if (!code2FA)      { showToast("Enter the 2FA code to confirm", "error"); return }
-  if (!reg2FASecret) { showToast("Please wait for QR code to load", "error"); return }
+  if (!code2FA)      { showToast("Enter the 2FA code", "error"); return }
+  if (!reg2FASecret) { showToast("Please wait for QR code", "error"); return }
 
   const btn = document.getElementById("btnRegisterConfirm")
   btn.disabled = true
   btn.textContent = "Connecting..."
 
-  const loginData = await API.login(id, password, code2FA)
+  const loginData = await API.login(regId, regPassword, code2FA)
 
   btn.disabled = false
   btn.textContent = "Create Account"
@@ -152,7 +157,12 @@ document.getElementById("btnRegisterConfirm").addEventListener("click", async ()
     return
   }
 
-  Session.set(loginData.token, { ...loginData.user, privKey: regKeys.privKey })
+  // Stocker session avec clé privée
+  Session.set(loginData.token, {
+    ...loginData.user,
+    privKey: regKeys.privKey
+  })
+
   window.location.href = "wallet.html"
 })
 
@@ -160,6 +170,7 @@ document.getElementById("btnRegisterConfirm").addEventListener("click", async ()
 startOTPCountdown()
 checkServerStatus()
 
+// Si déjà connecté, aller direct au wallet
 if (Session.isLoggedIn()) {
   window.location.href = "wallet.html"
 }
