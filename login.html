@@ -10,8 +10,6 @@
   <script src="https://cdn.jsdelivr.net/npm/tweetnacl-util@0.15.1/nacl-util.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
-  
-  
 <body>
 
   <div class="bg-orbs"></div>
@@ -53,7 +51,27 @@
         </div>
         <div class="otp-hint">⚠ The code changes every 30 seconds — enter it quickly</div>
       </div>
+
+      <!-- STAY SIGNED IN -->
+      <div class="stay-row">
+        <label class="stay-label">
+          <input type="checkbox" id="staySignedIn" />
+          <span>Stay signed in on this device</span>
+        </label>
+      </div>
+
       <button class="btn btn-primary mt" id="btnLogin">Sign In</button>
+
+      <!-- PRIVATE KEY SECTION (apparaît si clé pas sauvegardée) -->
+      <div id="privKeySection" class="hidden">
+        <div class="divider">Private Key Required</div>
+        <div class="input-group">
+          <label>⚠ Private Key — First time on this device</label>
+          <textarea id="loginPrivKey" rows="3" placeholder="Paste your private key here..."></textarea>
+        </div>
+        <p class="hint">Your key will be saved on this device. You won't need to enter it again.</p>
+        <button class="btn btn-primary mt" id="btnConfirmPrivKey">Confirm & Enter Wallet</button>
+      </div>
     </div>
 
     <!-- REGISTER FORM -->
@@ -96,7 +114,7 @@
         </div>
 
         <div class="key-card warn-card mt">
-          <div class="key-card-label">⚠ Private Key — Save this NOW, it won't be shown again</div>
+          <div class="key-card-label">⚠ Private Key — Saved on this device automatically</div>
           <div class="key-value blurred" id="regPrivKey">—</div>
           <button class="btn btn-ghost btn-sm mt" id="btnRevealPriv">Show</button>
           <button class="btn btn-ghost btn-sm mt" id="btnCopyPriv">Copy</button>
@@ -106,17 +124,9 @@
 
         <div id="qrWrap" class="qr-wrap"></div>
         <div class="secret-box" id="reg2FASecret">—</div>
-        <p class="hint">Scan this QR code with Google Authenticator, then enter the 6-digit code below to confirm.</p>
+        <p class="hint">Scan this QR code with Google Authenticator, then click the button below to go to Sign In.</p>
 
-        <div class="input-group mt">
-          <label>2FA Code to confirm</label>
-          <div class="input-wrap">
-            <span class="input-icon">⬡</span>
-            <input type="text" id="reg2FACode" placeholder="000000" maxlength="6" inputmode="numeric" />
-          </div>
-        </div>
-
-        <button class="btn btn-primary mt" id="btnRegisterConfirm">Create Account</button>
+        <button class="btn btn-primary mt" id="btnRegisterConfirm">Go to Sign In →</button>
         <button class="btn btn-ghost btn-sm mt" id="btnBackStep1">← Back</button>
       </div>
 
@@ -125,8 +135,7 @@
   </div>
 
   <div id="toast" class="toast hidden"></div>
-      <script src="api.js"></script>
-      <script src="login.js"></script>
+  <script src="api.js"></script>
+  <script src="login.js"></script>
 </body>
 </html>
-

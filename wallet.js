@@ -1,12 +1,11 @@
 // ===== AUTH CHECK =====
-// Si pas connecté → login
 if (!Session.isLoggedIn()) {
   window.location.href = "login.html"
 }
 
 const user   = Session.getUser()
 const userId = user?.id
-let privKey  = user?.privKey || null
+let privKey  = userId ? Session.getPrivKey(userId) : null
 let priceHistory = []
 
 // ===== INIT UI =====
@@ -107,30 +106,46 @@ async function loadHistory() {
     list.innerHTML = '<div class="empty-state">Unable to load</div>'
     return
   }
-  const txs = [...data.transactions].reverse()
+
+  // Filtrer seulement les transactions de l'utilisateur connecté
+  const txs = [...data.transactions]
+    .filter(tx => tx.SENDER.ID === userId || tx.RECEIVER.ID === userId)
+    .reverse()
+
   if (txs.length === 0) {
     list.innerHTML = '<div class="empty-state">No transactions yet</div>'
     return
   }
-  list.innerHTML = txs.map(tx => `
-    <div class="tx-item">
-      <div class="tx-row">
-        <span><span class="tx-from">${tx.SENDER.ID}</span> → <span class="tx-to">${tx.RECEIVER.ID}</span></span>
-        <span class="tx-amt">${tx.SENDER.QUANTITY} ARC</span>
+
+  list.innerHTML = txs.map(tx => {
+    const isSender   = tx.SENDER.ID === userId
+    const otherParty = isSender ? tx.RECEIVER.ID : tx.SENDER.ID
+    const amtColor   = isSender ? "style='color:var(--danger)'" : "style='color:var(--success)'"
+    const amtSign    = isSender ? "−" : "+"
+
+    return `
+      <div class="tx-item">
+        <div class="tx-row">
+          <span>${isSender
+            ? `<span class="tx-from">${userId}</span> → <span class="tx-to">${otherParty}</span>`
+            : `<span class="tx-from">${otherParty}</span> → <span class="tx-to">${userId}</span>`
+          }</span>
+          <span class="tx-amt" ${amtColor}>${amtSign}${tx.SENDER.QUANTITY} ARC</span>
+        </div>
+        ${tx.SENDER.NOTE ? `<div class="tx-note">${tx.SENDER.NOTE}</div>` : ""}
+        <div class="tx-row" style="margin-top:0.3rem">
+          <span class="tx-time">${tx.WHEN} ${tx.TIME}</span>
+          <span class="tx-status ${tx.STATUS}">${tx.STATUS.toUpperCase()}</span>
+        </div>
       </div>
-      ${tx.SENDER.NOTE ? `<div class="tx-note">${tx.SENDER.NOTE}</div>` : ""}
-      <div class="tx-row" style="margin-top:0.3rem">
-        <span class="tx-time">${tx.WHEN} ${tx.TIME}</span>
-        <span class="tx-status ${tx.STATUS}">${tx.STATUS.toUpperCase()}</span>
-      </div>
-    </div>
-  `).join("")
+    `
+  }).join("")
 }
 
 // ===== SEND =====
 document.getElementById("btnSend").addEventListener("click", async () => {
   if (!privKey) {
-    showToast("Private key missing — please sign in again", "error")
+    showToast("Private key missing — go to Settings to add it", "error")
     return
   }
 

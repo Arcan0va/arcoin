@@ -2,26 +2,62 @@
 const SERVER = "https://arcacoin.duckdns.org"
 
 // ===== SESSION =====
-// sessionStorage : survit à la navigation, disparaît à la fermeture de l'onglet
+// JWT + user info : sessionStorage par défaut (disparaît à la fermeture)
+// Si "stay signed in" : localStorage (persiste sur l'appareil)
+// Clé privée : toujours localStorage (persiste, saisie une seule fois)
+
 const Session = {
-  set(token, user) {
-    sessionStorage.setItem("arc_token", token)
-    sessionStorage.setItem("arc_user", JSON.stringify(user))
+  set(token, user, staySignedIn = false) {
+    const storage = staySignedIn ? localStorage : sessionStorage
+    // Nettoyer l'autre storage
+    sessionStorage.removeItem("arc_token")
+    sessionStorage.removeItem("arc_user")
+    localStorage.removeItem("arc_token")
+    localStorage.removeItem("arc_user")
+    storage.setItem("arc_token", token)
+    storage.setItem("arc_user", JSON.stringify(user))
+    if (staySignedIn) localStorage.setItem("arc_stay", "1")
   },
+
   getToken() {
-    return sessionStorage.getItem("arc_token") || null
+    return localStorage.getItem("arc_token") || sessionStorage.getItem("arc_token") || null
   },
+
   getUser() {
     try {
-      const raw = sessionStorage.getItem("arc_user")
+      const raw = localStorage.getItem("arc_user") || sessionStorage.getItem("arc_user")
       return raw ? JSON.parse(raw) : null
     } catch { return null }
   },
-  clear() {
-    sessionStorage.clear()
+
+  isStaySignedIn() {
+    return !!localStorage.getItem("arc_stay")
   },
+
+  clear() {
+    sessionStorage.removeItem("arc_token")
+    sessionStorage.removeItem("arc_user")
+    localStorage.removeItem("arc_token")
+    localStorage.removeItem("arc_user")
+    localStorage.removeItem("arc_stay")
+    // Ne pas supprimer la clé privée au logout — elle reste sur l'appareil
+  },
+
   isLoggedIn() {
-    return !!sessionStorage.getItem("arc_token")
+    return !!(localStorage.getItem("arc_token") || sessionStorage.getItem("arc_token"))
+  },
+
+  // Clé privée — toujours localStorage, liée à l'ID utilisateur
+  savePrivKey(userId, privKey) {
+    localStorage.setItem(`arc_privkey_${userId}`, privKey)
+  },
+
+  getPrivKey(userId) {
+    return localStorage.getItem(`arc_privkey_${userId}`) || null
+  },
+
+  deletePrivKey(userId) {
+    localStorage.removeItem(`arc_privkey_${userId}`)
   }
 }
 
@@ -41,23 +77,17 @@ const API = {
         return null
       }
       return data
-    } catch(e) {
+    } catch {
       showToast("Server unreachable", "error")
       return null
     }
   },
 
   async register(id, pubKey, password) {
-    return this._fetch("/register", {
-      method: "POST",
-      body: JSON.stringify({ id, pubKey, password })
-    })
+    return this._fetch("/register", { method: "POST", body: JSON.stringify({ id, pubKey, password }) })
   },
   async login(id, password, token2FA) {
-    return this._fetch("/login", {
-      method: "POST",
-      body: JSON.stringify({ id, password, token2FA })
-    })
+    return this._fetch("/login", { method: "POST", body: JSON.stringify({ id, password, token2FA }) })
   },
   async getUser(id)  { return this._fetch(`/user/${id}`) },
   async getLedger()  { return this._fetch("/ledger") },

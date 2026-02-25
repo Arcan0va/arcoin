@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="settings.css" />
   <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tweetnacl-util@0.15.1/nacl-util.min.js"></script>
-  <script src="api.js"></script>
 </head>
 <body>
 
@@ -65,17 +64,38 @@
         <div class="key-section mt">
           <div class="key-label warn">⚠ Private Key</div>
           <div class="key-val blurred" id="settingsPrivKey">—</div>
-          <div style="display:flex;gap:0.5rem" class="mt">
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap" class="mt">
             <button class="btn btn-ghost btn-sm" id="btnRevealPriv">Show</button>
             <button class="btn btn-ghost btn-sm" id="btnCopyPriv">Copy</button>
+            <button class="btn btn-danger btn-sm" id="btnDeletePriv">Remove from device</button>
           </div>
         </div>
-        <p class="hint mt">Never share your private key. It is stored in memory only and will be lost when you sign out.</p>
+
+        <!-- Changer la clé privée -->
+        <div class="key-section mt" id="updatePrivKeySection">
+          <div class="key-label">Update Private Key</div>
+          <textarea id="newPrivKey" rows="2" placeholder="Paste new private key..."></textarea>
+          <button class="btn btn-ghost btn-sm mt" id="btnUpdatePrivKey">Save to device</button>
+        </div>
+
+        <p class="hint mt">Your private key is stored only on this device. Never share it with anyone.</p>
       </div>
 
-      <!-- ACCOUNT INFO -->
+      <!-- SESSION -->
       <div class="glass settings-card">
-        <div class="settings-card-title">Account Information</div>
+        <div class="settings-card-title">Session</div>
+
+        <div class="info-row">
+          <span class="info-label">Stay signed in</span>
+          <label class="toggle">
+            <input type="checkbox" id="toggleStaySignedIn" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <p class="hint">When enabled, you stay signed in even after closing the browser.</p>
+
+        <div class="divider"></div>
+
         <div class="info-row">
           <span class="info-label">Username</span>
           <span class="info-val" id="settingsId">—</span>
@@ -92,6 +112,7 @@
           <span class="info-label">Status</span>
           <span class="info-val" id="settingsStatus">—</span>
         </div>
+
         <div class="divider"></div>
         <button class="btn btn-danger btn-sm" id="btnLogoutSettings">Sign Out</button>
       </div>
@@ -101,17 +122,43 @@
 
   <div id="toast" class="toast hidden"></div>
 
+  <script src="api.js"></script>
   <script>
     requireAuth()
 
     const user    = Session.getUser()
     const userId  = user?.id
-    const privKey = user?.privKey || null
+    const privKey = userId ? Session.getPrivKey(userId) : null
 
     document.getElementById("settingsId").textContent      = userId || "—"
     document.getElementById("settingsPubKey").textContent  = user?.pubKey || "—"
-    document.getElementById("settingsPrivKey").textContent = privKey || "Not available"
+    document.getElementById("settingsPrivKey").textContent = privKey || "Not saved on this device"
 
+    // Stay signed in toggle
+    document.getElementById("toggleStaySignedIn").checked = Session.isStaySignedIn()
+
+    document.getElementById("toggleStaySignedIn").addEventListener("change", (e) => {
+      const token = Session.getToken()
+      if (e.target.checked) {
+        // Passer en localStorage
+        localStorage.setItem("arc_token", token)
+        localStorage.setItem("arc_user", JSON.stringify(user))
+        localStorage.setItem("arc_stay", "1")
+        sessionStorage.removeItem("arc_token")
+        sessionStorage.removeItem("arc_user")
+        showToast("You'll stay signed in on this device", "success")
+      } else {
+        // Passer en sessionStorage
+        sessionStorage.setItem("arc_token", token)
+        sessionStorage.setItem("arc_user", JSON.stringify(user))
+        localStorage.removeItem("arc_token")
+        localStorage.removeItem("arc_user")
+        localStorage.removeItem("arc_stay")
+        showToast("You'll be signed out when you close the browser", "info")
+      }
+    })
+
+    // Charger balance
     API.getUser(userId).then(data => {
       if (!data || data.error) return
       document.getElementById("settingsBalance").textContent = `${data.balance} ARC`
@@ -119,11 +166,13 @@
       document.getElementById("settingsStatus").textContent  = data.status
     })
 
+    // Copier pub key
     document.getElementById("btnCopyPub").addEventListener("click", () => {
       navigator.clipboard.writeText(user?.pubKey || "")
       showToast("Public key copied!", "success")
     })
 
+    // Reveal / copier / supprimer priv key
     document.getElementById("btnRevealPriv").addEventListener("click", () => {
       const el = document.getElementById("settingsPrivKey")
       el.classList.toggle("blurred")
@@ -136,6 +185,24 @@
       showToast("Private key copied!", "success")
     })
 
+    document.getElementById("btnDeletePriv").addEventListener("click", () => {
+      if (!confirm("Remove private key from this device? You won't be able to send ARC until you add it again.")) return
+      Session.deletePrivKey(userId)
+      document.getElementById("settingsPrivKey").textContent = "Not saved on this device"
+      showToast("Private key removed from this device", "info")
+    })
+
+    // Mettre à jour la clé privée
+    document.getElementById("btnUpdatePrivKey").addEventListener("click", () => {
+      const newKey = document.getElementById("newPrivKey").value.trim()
+      if (!newKey) { showToast("Enter a private key", "error"); return }
+      Session.savePrivKey(userId, newKey)
+      document.getElementById("settingsPrivKey").textContent = newKey
+      document.getElementById("newPrivKey").value = ""
+      showToast("Private key saved on this device!", "success")
+    })
+
+    // Changer mot de passe
     document.getElementById("btnChangePassword").addEventListener("click", async () => {
       const oldP = document.getElementById("oldPassword").value
       const newP = document.getElementById("newPassword").value
